@@ -7,7 +7,7 @@ function Blog() {
     return (
         <>
             <div className='flex justify-center pt-10'>
-                <div className='w-[80%] blog rounded-md p-3 w-62 bg-slate-900 border-5 border-gray-700 p-8'>
+                <div className='w-[80%] blog rounded-md w-62 bg-slate-900 border-5 border-gray-700 p-8'>
                     <h3 className='font-semibold text-5xl py-2 text-gray-100'>
                         Introduction to Express JS
                     </h3>
