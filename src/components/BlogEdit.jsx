@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react'
+import { useNavigate, useParams } from 'react-router-dom'
 import Axios from 'axios'
-import { useNavigate } from 'react-router-dom'
 
 import { getUserInfo } from '../authService.js'
+import Header from './Header.jsx'
 
-function BForm() {
+function BlogEdit() {
   const [title, setTitle] = useState('')
   const [blogContent, setBlogContent] = useState('')
   const [showNotification, setShowNotification] = useState(false)
@@ -12,8 +13,9 @@ function BForm() {
   const [message, setMessage] = useState('')
   const [err, setErr] = useState('')
 
-  const navigateTo = useNavigate()
   const userInfo = getUserInfo()
+  const navigateTo = useNavigate()
+  const { id } = useParams()
 
   const cleanseData = (title, blogContent, publishedStatus) => {
     if (title.length > 0 && blogContent.length > 0) {
@@ -30,13 +32,13 @@ function BForm() {
     const updatedPublishedStatus = true
     const blog_data = cleanseData(title, blogContent, updatedPublishedStatus)
 
-    Axios.post(
-      'https://bloggerz-backend-production.up.railway.app/api/create',
+    Axios.put(
+      `https://bloggerz-backend-production.up.railway.app/api/blogs/${id}/update`,
       blog_data
     )
       .then((response) => {
         if (response.status === 200) {
-          setMessage('Blog published successfully')
+          setMessage('Blog updated successfully')
           setShowNotification(true)
         }
       })
@@ -49,6 +51,8 @@ function BForm() {
             setShowError(true)
             setErr('Title is too short')
           }
+        } else {
+          console.log(err.message)
         }
       })
   }
@@ -57,8 +61,8 @@ function BForm() {
     const updatedPublishedStatus = false
     const blog_data = cleanseData(title, blogContent, updatedPublishedStatus)
 
-    Axios.post(
-      'https://bloggerz-backend-production.up.railway.app/api/create',
+    Axios.put(
+      `https://bloggerz-backend-production.up.railway.app/api/blogs/${id}/update`,
       blog_data
     )
       .then((response) => {
@@ -76,6 +80,8 @@ function BForm() {
             setShowError(true)
             setErr('Title is too short')
           }
+        } else {
+          console.log(err.message)
         }
       })
   }
@@ -94,17 +100,18 @@ function BForm() {
       // Clean up the timer if the component unmounts or the notification is dismissed early
       return () => clearTimeout(timer)
     }
-    if (showError) {
-      const timer = setTimeout(() => {
-        setShowError(true)
-      }, 2000)
-
-      return () => clearTimeout(timer)
-    }
-  }, [showNotification, navigateTo, showError])
+    Axios.get(
+      `https://bloggerz-backend-production.up.railway.app/api/blogs/${id}`
+    ).then((response) => {
+      const response_data = response.data
+      setTitle(response_data.title)
+      setBlogContent(response_data.blog)
+    })
+  }, [showNotification, navigateTo, id])
 
   return (
     <>
+      <Header />
       {showNotification && (
         <div className='float-right mr-6 mt-[-95px] h-20'>
           <div
@@ -174,9 +181,7 @@ function BForm() {
       )}
 
       <section className='flex flex-col items-center pt-2'>
-        <h2 className='text-white font-bold text-4xl my-4 pb-5'>
-          Create a Blog
-        </h2>
+        <h2 className='text-white font-bold text-4xl my-4 pb-5'>Update Blog</h2>
         <div className='cat w-[70%] rounded-lg shadow dark:border xl:p-0 dark:bg-gray-800 dark:border-gray-700'>
           <div className='p-6 space-y-4 md:space-y-6 sm:p-8 w-[100%] '>
             <div className='space-y-4 md:space-y-6'>
@@ -192,6 +197,7 @@ function BForm() {
                   name='title'
                   onChange={(e) => setTitle(e.target.value)}
                   id='title'
+                  value={title}
                   className='bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500'
                   required
                 />
@@ -209,6 +215,7 @@ function BForm() {
                   name='blog'
                   id='blog'
                   cols='30'
+                  value={blogContent}
                   onChange={(e) => setBlogContent(e.target.value)}
                   rows='10'
                   className='bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500'
@@ -220,13 +227,13 @@ function BForm() {
                   onClick={publish_blog}
                   className='w-full text-white bg-primary-600 hover:bg-primary-700 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800'
                 >
-                  Publish
+                  Update & publish
                 </button>
                 <button
                   onClick={unpublish_blog}
-                  className='cursor-pointer w-28 font-medium text-primary-600 hover:underline dark:text-primary-500'
+                  className='cursor-pointer w-44 font-medium text-primary-600 hover:underline dark:text-primary-500'
                 >
-                  Save to drafts
+                  Update & save to drafts
                 </button>
               </div>
             </div>
@@ -237,4 +244,4 @@ function BForm() {
   )
 }
 
-export default BForm
+export default BlogEdit
